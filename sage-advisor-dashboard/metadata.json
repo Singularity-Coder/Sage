@@ -1,0 +1,7 @@
+{
+  "name": "Sage Advisor Dashboard",
+  "description": "An autonomous agent dashboard that guides users through life stages and aspirations, from basic needs to spiritual realization, using MCP integration and Gemini intelligence.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
