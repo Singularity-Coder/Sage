@@ -3,7 +3,8 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { SAGE_SYSTEM_PROMPT } from "../constants";
 import { UserProfile, MaslowLevel, DashboardCard } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Always use the required initialization format and direct process.env.API_KEY
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export async function getSageRecommendations(profile: UserProfile): Promise<DashboardCard[]> {
   const currentTime = new Date().toLocaleTimeString();
@@ -48,6 +49,7 @@ export async function getSageRecommendations(profile: UserProfile): Promise<Dash
       },
     });
 
+    // Access .text property directly (it is not a method)
     return JSON.parse(response.text || "[]");
   } catch (error) {
     console.error("Sage failed to generate recommendations:", error);
@@ -62,6 +64,7 @@ export async function analyzeJournalEntry(content: string) {
       model: "gemini-3-flash-preview",
       contents: prompt,
     });
+    // Access .text property directly
     return response.text;
   } catch (error) {
     return "Sage is reflecting on your words...";

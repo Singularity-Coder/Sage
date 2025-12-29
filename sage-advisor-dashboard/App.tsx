@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { UserProfile, DashboardCard, MaslowLevel } from './types';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { UserProfile, DashboardCard, TaskStatus, SageNotification } from './types';
 import { INITIAL_PROFILE } from './constants';
 import { getSageRecommendations } from './services/geminiService';
 import Layout from './components/Layout';
@@ -8,6 +8,9 @@ import Dashboard from './components/Dashboard';
 import ProfileSetup from './components/ProfileSetup';
 import Workflows from './components/Workflows';
 import Notes from './components/Notes';
+import Calendar from './components/Calendar';
+import NotificationPanel from './components/NotificationPanel';
+import TaskChat from './components/TaskChat';
 
 const App: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile>(() => {
@@ -16,23 +19,135 @@ const App: React.FC = () => {
   });
 
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [cards, setCards] = useState<DashboardCard[]>([]);
+  const [cards, setCards] = useState<DashboardCard[]>(() => {
+    const saved = localStorage.getItem('sage_cards');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Notification States
+  const [isNotifPanelOpen, setIsNotifPanelOpen] = useState(false);
+  const [notifications, setNotifications] = useState<SageNotification[]>(() => {
+    const saved = localStorage.getItem('sage_notifications');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Task Chat States
+  const [selectedTask, setSelectedTask] = useState<DashboardCard | null>(null);
+
+  const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
 
   const refreshRecommendations = useCallback(async () => {
     if (!profile.onboarded) return;
     setIsLoading(true);
     const newCards = await getSageRecommendations(profile);
-    setCards(newCards);
+    
+    // Merge new cards into existing, defaulting status to 'todo'
+    setCards(prev => {
+      const existingIds = new Set(prev.map(c => c.id));
+      const freshCards = newCards.filter(c => !existingIds.has(c.id)).map(c => ({
+        ...c,
+        status: 'todo' as TaskStatus
+      }));
+      const updated = [...prev, ...freshCards];
+      localStorage.setItem('sage_cards', JSON.stringify(updated));
+      return updated;
+    });
+
+    // Create a new notification about new recommendations
+    if (newCards.length > 0) {
+      const newNotif: SageNotification = {
+        id: Date.now().toString(),
+        title: 'New Path Revealed',
+        message: `Sage has computed ${newCards.length} new insights for your journey.`,
+        timestamp: Date.now(),
+        type: 'insight',
+        read: false,
+        actionLabel: 'View Sanctum'
+      };
+      setNotifications(prev => {
+        const updated = [newNotif, ...prev].slice(0, 20);
+        localStorage.setItem('sage_notifications', JSON.stringify(updated));
+        return updated;
+      });
+    }
+
     setIsLoading(false);
   }, [profile]);
 
+  // Periodic check for pending tasks to nudge the user
+  useEffect(() => {
+    if (!profile.onboarded) return;
+
+    const interval = setInterval(() => {
+      const pendingTasks = cards.filter(c => c.status === 'todo');
+      if (pendingTasks.length > 0) {
+        // Only nudge if we haven't nudged recently (last 30 mins)
+        const lastNotif = notifications[0];
+        const isRecent = lastNotif && (Date.now() - lastNotif.timestamp < 1000 * 60 * 30);
+        
+        if (!isRecent) {
+          const task = pendingTasks[Math.floor(Math.random() * pendingTasks.length)];
+          const nudge: SageNotification = {
+            id: `nudge-${Date.now()}`,
+            title: 'Presence Check',
+            message: `Seeker, your focus remains on "${task.title}". Shall we advance this task to communion?`,
+            timestamp: Date.now(),
+            type: 'nudge',
+            read: false,
+            actionLabel: 'Start Task',
+            cardId: task.id
+          };
+          setNotifications(prev => {
+            const updated = [nudge, ...prev].slice(0, 20);
+            localStorage.setItem('sage_notifications', JSON.stringify(updated));
+            return updated;
+          });
+        }
+      }
+    }, 1000 * 60 * 10); // Every 10 minutes
+
+    return () => clearInterval(interval);
+  }, [cards, profile.onboarded, notifications]);
+
   useEffect(() => {
     if (profile.onboarded) {
-      refreshRecommendations();
+      if (cards.length === 0) {
+        refreshRecommendations();
+      }
       localStorage.setItem('sage_profile', JSON.stringify(profile));
     }
-  }, [profile, refreshRecommendations]);
+  }, [profile, cards.length, refreshRecommendations]);
+
+  const handleUpdateCardStatus = (cardId: string, newStatus: TaskStatus) => {
+    setCards(prev => {
+      const updated = prev.map(card => 
+        card.id === cardId ? { ...card, status: newStatus } : card
+      );
+      localStorage.setItem('sage_cards', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleMarkNotifRead = (id: string) => {
+    setNotifications(prev => {
+      const updated = prev.map(n => n.id === id ? { ...n, read: true } : n);
+      localStorage.setItem('sage_notifications', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleNotifAction = (cardId?: string) => {
+    if (cardId) {
+      handleUpdateCardStatus(cardId, 'doing');
+      setActiveTab('dashboard');
+      const card = cards.find(c => c.id === cardId);
+      if (card) setSelectedTask(card);
+    } else {
+      setActiveTab('dashboard');
+    }
+    setIsNotifPanelOpen(false);
+  };
 
   const handleOnboardingComplete = (newProfile: UserProfile) => {
     setProfile(newProfile);
@@ -52,10 +167,14 @@ const App: React.FC = () => {
             cards={cards} 
             isLoading={isLoading} 
             onRefresh={refreshRecommendations} 
+            onUpdateCardStatus={handleUpdateCardStatus}
+            onTaskClick={(task) => setSelectedTask(task)}
           />
         );
       case 'workflows':
         return <Workflows />;
+      case 'calendar':
+        return <Calendar />;
       case 'notes':
         return <Notes />;
       case 'mcp':
@@ -111,6 +230,8 @@ const App: React.FC = () => {
                  <button 
                   onClick={() => {
                     localStorage.removeItem('sage_profile');
+                    localStorage.removeItem('sage_cards');
+                    localStorage.removeItem('sage_notifications');
                     window.location.reload();
                   }}
                   className="px-6 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 transition-colors"
@@ -130,8 +251,26 @@ const App: React.FC = () => {
   };
 
   return (
-    <Layout activeTab={activeTab} setActiveTab={setActiveTab} userName={profile.name}>
+    <Layout 
+      activeTab={activeTab} 
+      setActiveTab={setActiveTab} 
+      userName={profile.name}
+      unreadCount={unreadCount}
+      onOpenNotifications={() => setIsNotifPanelOpen(true)}
+    >
       {renderContent()}
+      <NotificationPanel 
+        isOpen={isNotifPanelOpen}
+        onClose={() => setIsNotifPanelOpen(false)}
+        notifications={notifications}
+        onMarkAsRead={handleMarkNotifRead}
+        onAction={handleNotifAction}
+      />
+      <TaskChat 
+        task={selectedTask}
+        isOpen={!!selectedTask}
+        onClose={() => setSelectedTask(null)}
+      />
     </Layout>
   );
 };

@@ -8,6 +8,8 @@ export enum MaslowLevel {
   TRANSCENDENCE = 'Transcendence'
 }
 
+export type TaskStatus = 'todo' | 'doing' | 'done';
+
 export interface UserProfile {
   name: string;
   age: number;
@@ -29,6 +31,18 @@ export interface DashboardCard {
   category: string;
   icon: string;
   timeContext?: string;
+  status?: TaskStatus;
+}
+
+export interface SageNotification {
+  id: string;
+  title: string;
+  message: string;
+  timestamp: number;
+  type: 'reminder' | 'insight' | 'nudge';
+  read: boolean;
+  actionLabel?: string;
+  cardId?: string;
 }
 
 export interface SageNote {

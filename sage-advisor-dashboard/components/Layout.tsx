@@ -6,12 +6,22 @@ interface LayoutProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   userName: string;
+  unreadCount: number;
+  onOpenNotifications: () => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userName }) => {
+const Layout: React.FC<LayoutProps> = ({ 
+  children, 
+  activeTab, 
+  setActiveTab, 
+  userName, 
+  unreadCount,
+  onOpenNotifications 
+}) => {
   const navItems = [
     { id: 'dashboard', icon: 'fa-gauge-high', label: 'Sanctum' },
     { id: 'workflows', icon: 'fa-diagram-project', label: 'Workflows' },
+    { id: 'calendar', icon: 'fa-calendar-days', label: 'Calendar' },
     { id: 'notes', icon: 'fa-book-open', label: 'Memories' },
     { id: 'mcp', icon: 'fa-server', label: 'MCP Links' },
     { id: 'settings', icon: 'fa-sliders', label: 'Essence' },
@@ -61,7 +71,22 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, user
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
-        <div className="p-8 h-full overflow-y-auto">
+        {/* Top Header for Notifications */}
+        <header className="h-16 flex items-center justify-end px-8 bg-white/50 border-b border-slate-200/50 backdrop-blur-sm">
+           <button 
+            onClick={onOpenNotifications}
+            className="relative w-10 h-10 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors"
+           >
+             <i className="fa-solid fa-bell"></i>
+             {unreadCount > 0 && (
+               <span className="absolute top-2 right-2 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                 {unreadCount}
+               </span>
+             )}
+           </button>
+        </header>
+        
+        <div className="flex-1 p-8 h-full overflow-y-auto">
           {children}
         </div>
       </main>
