@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { UserProfile, DashboardCard, TaskStatus, SageNotification } from './types';
-import { INITIAL_PROFILE } from './constants';
+import { UserProfile, DashboardCard, TaskStatus, SageNotification, SageNote } from './types';
+import { INITIAL_PROFILE, DUMMY_CARDS, DUMMY_NOTES } from './constants';
 import { getSageRecommendations } from './services/geminiService';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
@@ -15,7 +15,9 @@ import TaskChat from './components/TaskChat';
 const App: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('sage_profile');
-    return saved ? JSON.parse(saved) : INITIAL_PROFILE;
+    if (saved) return JSON.parse(saved);
+    // Explicitly ensure default is Dummy mode for new users
+    return { ...INITIAL_PROFILE, isDummyMode: true };
   });
 
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -40,10 +42,22 @@ const App: React.FC = () => {
   const refreshRecommendations = useCallback(async () => {
     if (!profile.onboarded) return;
     setIsLoading(true);
-    const newCards = await getSageRecommendations(profile);
+
+    let newCards: DashboardCard[] = [];
+    if (profile.isDummyMode) {
+      await new Promise(r => setTimeout(r, 800));
+      newCards = DUMMY_CARDS;
+    } else {
+      newCards = await getSageRecommendations(profile);
+    }
     
-    // Merge new cards into existing, defaulting status to 'todo'
     setCards(prev => {
+      // If we switched to dummy mode, we replace everything with dummy cards
+      if (profile.isDummyMode) {
+        localStorage.setItem('sage_cards', JSON.stringify(newCards));
+        return newCards.map(c => ({ ...c, status: c.status || 'todo' }));
+      }
+      
       const existingIds = new Set(prev.map(c => c.id));
       const freshCards = newCards.filter(c => !existingIds.has(c.id)).map(c => ({
         ...c,
@@ -54,12 +68,13 @@ const App: React.FC = () => {
       return updated;
     });
 
-    // Create a new notification about new recommendations
     if (newCards.length > 0) {
       const newNotif: SageNotification = {
         id: Date.now().toString(),
-        title: 'New Path Revealed',
-        message: `Sage has computed ${newCards.length} new insights for your journey.`,
+        title: profile.isDummyMode ? 'Simulated Insights' : 'New Path Revealed',
+        message: profile.isDummyMode 
+          ? 'Sage has loaded the default developmental path for your profile.'
+          : `Sage has computed ${newCards.length} new insights for your journey.`,
         timestamp: Date.now(),
         type: 'insight',
         read: false,
@@ -75,14 +90,12 @@ const App: React.FC = () => {
     setIsLoading(false);
   }, [profile]);
 
-  // Periodic check for pending tasks to nudge the user
   useEffect(() => {
     if (!profile.onboarded) return;
 
     const interval = setInterval(() => {
       const pendingTasks = cards.filter(c => c.status === 'todo');
       if (pendingTasks.length > 0) {
-        // Only nudge if we haven't nudged recently (last 30 mins)
         const lastNotif = notifications[0];
         const isRecent = lastNotif && (Date.now() - lastNotif.timestamp < 1000 * 60 * 30);
         
@@ -105,7 +118,7 @@ const App: React.FC = () => {
           });
         }
       }
-    }, 1000 * 60 * 10); // Every 10 minutes
+    }, 1000 * 60 * 10);
 
     return () => clearInterval(interval);
   }, [cards, profile.onboarded, notifications]);
@@ -150,8 +163,18 @@ const App: React.FC = () => {
   };
 
   const handleOnboardingComplete = (newProfile: UserProfile) => {
-    setProfile(newProfile);
-    localStorage.setItem('sage_profile', JSON.stringify(newProfile));
+    setProfile({ ...newProfile, isDummyMode: true });
+    localStorage.setItem('sage_profile', JSON.stringify({ ...newProfile, isDummyMode: true }));
+  };
+
+  const toggleDummyMode = () => {
+    const newMode = !profile.isDummyMode;
+    const updated = { ...profile, isDummyMode: newMode };
+    setProfile(updated);
+    localStorage.setItem('sage_profile', JSON.stringify(updated));
+    // Clear cards to force refresh based on mode
+    setCards([]);
+    localStorage.removeItem('sage_cards');
   };
 
   if (!profile.onboarded) {
@@ -174,9 +197,9 @@ const App: React.FC = () => {
       case 'workflows':
         return <Workflows />;
       case 'calendar':
-        return <Calendar />;
+        return <Calendar isDummy={profile.isDummyMode} />;
       case 'notes':
-        return <Notes />;
+        return <Notes isDummy={profile.isDummyMode} />;
       case 'mcp':
         return (
           <div className="flex flex-col items-center justify-center h-full text-center p-10 bg-white rounded-[3rem] border border-dashed border-slate-300">
@@ -194,52 +217,80 @@ const App: React.FC = () => {
         );
       case 'settings':
         return (
-          <div className="max-w-2xl mx-auto bg-white p-10 rounded-3xl shadow-sm border border-slate-200">
-            <h2 className="text-2xl font-serif font-bold mb-8">Essence Configuration</h2>
+          <div className="max-w-2xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
+            <h2 className="text-3xl font-serif font-bold mb-8 text-slate-800">Essence Configuration</h2>
             
-            <div className="space-y-6">
+            <div className="space-y-8">
+              {/* Dummy Mode Switch */}
+              <div className="flex items-center justify-between p-6 bg-slate-50 rounded-[2rem] border-2 border-dashed border-indigo-100/50">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-sm ${profile.isDummyMode ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'}`}>
+                    <i className={`fa-solid ${profile.isDummyMode ? 'fa-vial-circle-check' : 'fa-brain-circuit'}`}></i>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-800">Simulated Presence (Dummy Data)</h3>
+                    <p className="text-xs text-slate-500 font-medium">When active, Sage uses pre-defined static data instead of the Gemini API.</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={toggleDummyMode}
+                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none ${profile.isDummyMode ? 'bg-amber-500' : 'bg-slate-300'}`}
+                >
+                  <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${profile.isDummyMode ? 'translate-x-7' : 'translate-x-1'}`} />
+                </button>
+              </div>
+
               <div>
-                <label className="block text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Primary Intelligence</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Core Intelligence Provider</label>
                 <div className="flex gap-4">
-                  <button className="flex-1 p-4 rounded-2xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-bold flex items-center gap-3">
-                    <i className="fa-solid fa-sparkles"></i>
-                    Gemini API
+                  <button 
+                    disabled={profile.isDummyMode}
+                    className={`flex-1 p-5 rounded-[2rem] border-2 transition-all flex flex-col gap-2 ${!profile.isDummyMode ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700' : 'border-slate-100 text-slate-300 cursor-not-allowed'}`}
+                  >
+                    <i className="fa-solid fa-sparkles text-xl"></i>
+                    <span className="font-bold text-sm">Gemini Flash</span>
+                    <span className="text-[10px] opacity-70">Real-time awareness</span>
                   </button>
-                  <button className="flex-1 p-4 rounded-2xl border-2 border-slate-200 text-slate-400 font-bold flex items-center gap-3 hover:border-slate-300">
-                    <i className="fa-solid fa-microchip"></i>
-                    Custom Model (Local)
+                  <button 
+                    disabled={!profile.isDummyMode}
+                    className={`flex-1 p-5 rounded-[2rem] border-2 transition-all flex flex-col gap-2 ${profile.isDummyMode ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 text-slate-300 cursor-not-allowed'}`}
+                  >
+                    <i className="fa-solid fa-microchip text-xl"></i>
+                    <span className="font-bold text-sm">Static Vault</span>
+                    <span className="text-[10px] opacity-70">Mock data stream</span>
                   </button>
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-slate-100">
-                <label className="block text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Profile Data</label>
+              <div className="pt-8 border-t border-slate-100">
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Profile Synthesis</label>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-50 p-4 rounded-xl">
+                  <div className="bg-slate-50 p-5 rounded-[1.5rem]">
                     <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Profession</span>
-                    <span className="font-medium text-slate-800">{profile.profession}</span>
+                    <span className="font-bold text-slate-800">{profile.profession}</span>
                   </div>
-                  <div className="bg-slate-50 p-4 rounded-xl">
+                  <div className="bg-slate-50 p-5 rounded-[1.5rem]">
                     <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Ambition</span>
-                    <span className="font-medium text-slate-800">{profile.financialAmbition}</span>
+                    <span className="font-bold text-slate-800">{profile.financialAmbition}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-6 flex justify-end gap-3">
+              <div className="pt-8 flex justify-between items-center">
                  <button 
                   onClick={() => {
                     localStorage.removeItem('sage_profile');
                     localStorage.removeItem('sage_cards');
                     localStorage.removeItem('sage_notifications');
+                    localStorage.removeItem('sage_memories');
                     window.location.reload();
                   }}
-                  className="px-6 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 transition-colors"
+                  className="px-6 py-3 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 transition-colors border border-transparent hover:border-red-100"
                 >
                   Reset Soul Data
                 </button>
-                <button className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-colors">
-                  Save Settings
+                <button className="bg-slate-900 text-white px-10 py-3 rounded-xl font-bold hover:bg-black transition-all shadow-lg hover:shadow-slate-200">
+                  Save Changes
                 </button>
               </div>
             </div>

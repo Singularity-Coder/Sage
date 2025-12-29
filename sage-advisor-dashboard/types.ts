@@ -21,6 +21,7 @@ export interface UserProfile {
   location: { lat: number; lng: number } | null;
   onboarded: boolean;
   currentLevel: MaslowLevel;
+  isDummyMode: boolean;
 }
 
 export interface DashboardCard {
