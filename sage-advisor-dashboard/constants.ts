@@ -43,7 +43,9 @@ export const DUMMY_CARDS: DashboardCard[] = [
     category: 'PHYSIOLOGICAL NEEDS',
     icon: 'fa-utensils',
     timeContext: 'Evening Meal',
-    status: 'todo'
+    status: 'todo',
+    expectedTime: '18:45',
+    duration: '45 mins'
   },
   {
     id: 'dummy-2',
@@ -53,7 +55,9 @@ export const DUMMY_CARDS: DashboardCard[] = [
     category: 'PHYSIOLOGICAL NEEDS',
     icon: 'fa-droplet',
     timeContext: 'Immediate',
-    status: 'todo'
+    status: 'todo',
+    expectedTime: 'Now',
+    duration: '2 mins'
   },
   {
     id: 'dummy-3',
@@ -63,7 +67,9 @@ export const DUMMY_CARDS: DashboardCard[] = [
     category: 'SAFETY NEEDS',
     icon: 'fa-shield-halved',
     timeContext: 'Now',
-    status: 'todo'
+    status: 'todo',
+    expectedTime: 'Soon',
+    duration: '5 mins'
   },
   {
     id: 'dummy-4',
@@ -73,7 +79,9 @@ export const DUMMY_CARDS: DashboardCard[] = [
     category: 'LOVE & BELONGING',
     icon: 'fa-people-group',
     timeContext: 'Flexible',
-    status: 'todo'
+    status: 'todo',
+    expectedTime: 'End of day',
+    duration: '15 mins'
   },
   {
     id: 'dummy-5',
@@ -83,7 +91,9 @@ export const DUMMY_CARDS: DashboardCard[] = [
     category: 'SELF-ACTUALIZATION',
     icon: 'fa-seedling',
     timeContext: 'Deep Work',
-    status: 'todo'
+    status: 'todo',
+    expectedTime: 'Morning',
+    duration: '15 mins'
   }
 ];
 

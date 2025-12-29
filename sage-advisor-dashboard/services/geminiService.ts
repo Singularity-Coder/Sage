@@ -21,6 +21,10 @@ export async function getSageRecommendations(profile: UserProfile): Promise<Dash
     Recommend 4-6 specific actions or cards for their dashboard today. 
     Include at least one time-sensitive food or activity suggestion.
     Suggest tasks that help them move towards the next level of Maslow's hierarchy.
+
+    For each task, provide:
+    - expectedTime: when the user should ideally complete it (e.g., "14:30", "Afternoon", "Before Bed")
+    - duration: estimated time the task takes (e.g., "30 mins", "1 hour", "5 mins")
   `;
 
   try {
@@ -42,6 +46,8 @@ export async function getSageRecommendations(profile: UserProfile): Promise<Dash
               category: { type: Type.STRING },
               icon: { type: Type.STRING },
               timeContext: { type: Type.STRING },
+              expectedTime: { type: Type.STRING },
+              duration: { type: Type.STRING },
             },
             required: ["id", "title", "description", "type", "category", "icon"],
           },

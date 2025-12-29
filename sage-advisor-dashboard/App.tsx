@@ -191,7 +191,8 @@ const App: React.FC = () => {
             isLoading={isLoading} 
             onRefresh={refreshRecommendations} 
             onUpdateCardStatus={handleUpdateCardStatus}
-            onTaskClick={(task) => setSelectedTask(task)}
+            onTaskClick={() => setActiveTab('workflows')}
+            onAskSage={(task) => setSelectedTask(task)}
           />
         );
       case 'workflows':

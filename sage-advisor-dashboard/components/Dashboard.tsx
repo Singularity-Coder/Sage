@@ -11,9 +11,10 @@ interface DashboardProps {
   onRefresh: () => void;
   onUpdateCardStatus: (cardId: string, newStatus: TaskStatus) => void;
   onTaskClick: (task: DashboardCard) => void;
+  onAskSage: (task: DashboardCard) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ profile, cards, isLoading, onRefresh, onUpdateCardStatus, onTaskClick }) => {
+const Dashboard: React.FC<DashboardProps> = ({ profile, cards, isLoading, onRefresh, onUpdateCardStatus, onTaskClick, onAskSage }) => {
   const currentLevelIndex = MASLOW_HIERARCHY.indexOf(profile.currentLevel);
 
   const onDragStart = (e: React.DragEvent, id: string) => {
@@ -69,13 +70,43 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, cards, isLoading, onRefr
               <h5 className="font-bold text-slate-800 text-base mb-1 group-hover:text-indigo-600 transition-colors">{card.title}</h5>
               <p className="text-slate-500 text-xs leading-relaxed mb-4">{card.description}</p>
               
+              {/* Task Metrics */}
+              {(card.expectedTime || card.duration) && (
+                <div className="flex gap-4 mb-4">
+                  {card.expectedTime && (
+                    <div className="flex items-center gap-1.5 text-slate-400">
+                      <i className="fa-solid fa-flag-checkered text-[10px]"></i>
+                      <span className="text-[10px] font-medium">{card.expectedTime}</span>
+                    </div>
+                  )}
+                  {card.duration && (
+                    <div className="flex items-center gap-1.5 text-slate-400">
+                      <i className="fa-solid fa-clock text-[10px]"></i>
+                      <span className="text-[10px] font-medium">{card.duration}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex items-center justify-between mt-2 pt-3 border-t border-slate-50">
                 <span className="text-[9px] font-bold uppercase text-slate-400 tracking-[0.1em]">
                   {card.category}
                 </span>
-                <button className="text-slate-300 hover:text-slate-600 p-1">
-                  <i className="fa-solid fa-ellipsis-v"></i>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAskSage(card);
+                    }}
+                    className="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-indigo-100 transition-colors border border-indigo-100/50 shadow-sm"
+                  >
+                    <i className="fa-solid fa-comment-dots"></i>
+                    Ask
+                  </button>
+                  <button className="text-slate-300 hover:text-slate-600 p-1" onClick={(e) => e.stopPropagation()}>
+                    <i className="fa-solid fa-ellipsis-v"></i>
+                  </button>
+                </div>
               </div>
             </div>
           ))}

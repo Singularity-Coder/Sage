@@ -33,6 +33,8 @@ export interface DashboardCard {
   icon: string;
   timeContext?: string;
   status?: TaskStatus;
+  expectedTime?: string;
+  duration?: string;
 }
 
 export interface SageNotification {
