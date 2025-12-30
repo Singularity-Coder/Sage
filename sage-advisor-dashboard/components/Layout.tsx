@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { navItems } from '../constants';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,15 +19,6 @@ const Layout: React.FC<LayoutProps> = ({
   unreadCount,
   onOpenNotifications 
 }) => {
-  const navItems = [
-    { id: 'dashboard', icon: 'fa-leaf', label: 'Home' },
-    { id: 'workflows', icon: 'fa-wind', label: 'Workflows' },
-    { id: 'calendar', icon: 'fa-moon', label: 'Calendar' },
-    { id: 'notes', icon: 'fa-feather', label: 'Memories' },
-    { id: 'mcp', icon: 'fa-seedling', label: 'Growth' },
-    { id: 'settings', icon: 'fa-gear', label: 'Settings' },
-  ];
-
   return (
     <div className="flex h-screen w-screen bg-[#FAF7F2]">
       {/* Sidebar - pt-16 (64px) provides small padding above the Sage title */}

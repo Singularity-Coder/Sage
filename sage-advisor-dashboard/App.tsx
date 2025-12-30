@@ -11,6 +11,7 @@ import Notes from './components/Notes';
 import Calendar from './components/Calendar';
 import NotificationPanel from './components/NotificationPanel';
 import TaskChat from './components/TaskChat';
+import GrowthConnectors from './components/GrowthConnectors';
 
 const App: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile>(() => {
@@ -35,6 +36,7 @@ const App: React.FC = () => {
   });
 
   // Task Chat States
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<DashboardCard | null>(null);
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
@@ -155,7 +157,10 @@ const App: React.FC = () => {
       handleUpdateCardStatus(cardId, 'doing');
       setActiveTab('dashboard');
       const card = cards.find(c => c.id === cardId);
-      if (card) setSelectedTask(card);
+      if (card) {
+        setSelectedTask(card);
+        setIsChatOpen(true);
+      }
     } else {
       setActiveTab('dashboard');
     }
@@ -177,6 +182,11 @@ const App: React.FC = () => {
     localStorage.removeItem('sage_cards');
   };
 
+  const handleOpenChatWithTask = (task: DashboardCard) => {
+    setSelectedTask(task);
+    setIsChatOpen(true);
+  };
+
   if (!profile.onboarded) {
     return <ProfileSetup onComplete={handleOnboardingComplete} />;
   }
@@ -192,7 +202,7 @@ const App: React.FC = () => {
             onRefresh={refreshRecommendations} 
             onUpdateCardStatus={handleUpdateCardStatus}
             onTaskClick={() => setActiveTab('workflows')}
-            onAskSage={(task) => setSelectedTask(task)}
+            onAskSage={handleOpenChatWithTask}
           />
         );
       case 'workflows':
@@ -202,37 +212,7 @@ const App: React.FC = () => {
       case 'notes':
         return <Notes isDummy={profile.isDummyMode} />;
       case 'mcp':
-        return (
-          <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
-             <header className="flex flex-col items-start text-left w-full space-y-1">
-                <h2 className="text-2xl md:text-3xl font-serif font-bold text-[#3E3E3E] tracking-tight">
-                  Nexus of Growth
-                </h2>
-                <div className="flex items-center justify-between w-full">
-                  <p className="text-slate-400 text-sm md:text-base font-medium tracking-tight">
-                    Local Model Context Protocol connectivity.
-                  </p>
-                  <button className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-[#3E3E3E] transition-all active:scale-95 border border-black/10 px-4 py-2 rounded-full bg-white/50 hover:bg-white hover:border-black/20 shadow-sm">
-                    <i className="fa-solid fa-server text-[10px]"></i>
-                    Add Server
-                  </button>
-                </div>
-              </header>
-
-              <div className="bg-[#FAF7F2]/50 rounded-[2rem] border border-black/[0.03] p-16 flex flex-col items-center justify-center text-center">
-                <div className="w-20 h-20 bg-white text-[#3E3E3E] rounded-[2rem] flex items-center justify-center text-3xl mb-8 border border-black/5 shadow-sm">
-                  <i className="fa-solid fa-cloud-bolt"></i>
-                </div>
-                <h3 className="text-2xl font-serif font-bold text-[#3E3E3E] mb-4 italic">"True knowledge resides in the edge of existence."</h3>
-                <p className="text-slate-400 max-w-sm font-medium mb-10 leading-relaxed">
-                  Connect to your local Model Context Protocol servers to provide Sage with private context from your local files, databases, and apps.
-                </p>
-                <button className="bg-[#3E3E3E] text-white px-10 py-4 rounded-full text-xs font-bold hover:bg-black transition-all shadow-lg active:scale-95">
-                  Begin Synchronization
-                </button>
-              </div>
-          </div>
-        );
+        return <GrowthConnectors />;
       case 'settings':
         return (
           <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
@@ -343,7 +323,19 @@ const App: React.FC = () => {
       unreadCount={unreadCount}
       onOpenNotifications={() => setIsNotifPanelOpen(true)}
     >
-      {renderContent()}
+      <div className="relative h-full">
+        {renderContent()}
+        
+        {/* Global Sage Chat FAB */}
+        <button 
+          onClick={() => setIsChatOpen(true)}
+          className="fixed bottom-12 right-12 w-16 h-16 bg-[#3E3E3E] text-white rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:bg-black hover:scale-110 transition-all duration-300 z-50 group"
+          title="Sage Advisor"
+        >
+          <i className="fa-solid fa-wand-magic-sparkles text-xl group-hover:animate-pulse"></i>
+        </button>
+      </div>
+
       <NotificationPanel 
         isOpen={isNotifPanelOpen}
         onClose={() => setIsNotifPanelOpen(false)}
@@ -353,8 +345,11 @@ const App: React.FC = () => {
       />
       <TaskChat 
         task={selectedTask}
-        isOpen={!!selectedTask}
-        onClose={() => setSelectedTask(null)}
+        isOpen={isChatOpen}
+        onClose={() => {
+          setIsChatOpen(false);
+          setSelectedTask(null);
+        }}
       />
     </Layout>
   );

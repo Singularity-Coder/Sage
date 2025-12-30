@@ -29,7 +29,7 @@ export const navItems = [
     { id: 'workflows', icon: 'fa-wind', label: 'Workflows' },
     { id: 'calendar', icon: 'fa-moon', label: 'Calendar' },
     { id: 'notes', icon: 'fa-feather', label: 'Memories' },
-    { id: 'mcp', icon: 'fa-seedling', label: 'Growth' },
+    { id: 'mcp', icon: 'fa-seedling', label: 'Roots' },
     { id: 'settings', icon: 'fa-gear', label: 'Settings' },
 ];
 
@@ -50,6 +50,19 @@ export const suggestions = [
     "Can you explain the philosophy?",
     "Give me a quick win for this.",
     "Can you clarify the steps?"
+];
+
+export const generalSuggestions = [
+    "What is my next priority?",
+    "Review my progress",
+    "Daily reflection",
+    "Guidance on Maslow's hierarchy",
+    "Manifestation advice",
+    "Morning alignment",
+    "Deep work focus",
+    "Analyze my recent memories",
+    "Evening wind-down",
+    "Gratitude practice"
 ];
 
 export const SAGE_SYSTEM_PROMPT = `
@@ -129,6 +142,7 @@ export const DUMMY_NOTES: SageNote[] = [
   {
     id: 'n-1',
     timestamp: Date.now() - 3600000 * 2,
+    title: 'Discipline & Patience',
     content: 'Today I noticed that discipline in physiological needs directly correlates with my patience during high-stress workflows.',
     tags: ['reflection', 'growth'],
     sentiment: 'positive'
@@ -136,6 +150,7 @@ export const DUMMY_NOTES: SageNote[] = [
   {
     id: 'n-2',
     timestamp: Date.now() - 3600000 * 24,
+    title: 'Moment of Clarity',
     content: 'Felt a moment of pure clarity while walking. The path to transcendence is not a destination, but the walk itself.',
     tags: ['spirituality', 'peace'],
     sentiment: 'reflective'

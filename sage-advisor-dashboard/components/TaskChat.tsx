@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { DashboardCard } from '../types';
-import { suggestions } from '../constants';
+import { suggestions, generalSuggestions } from '../constants';
 
 interface TaskChatProps {
   task: DashboardCard | null;
@@ -22,13 +22,22 @@ const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen && task) {
-      setMessages([
-        { 
-          role: 'model', 
-          text: `Seeker, I am here to guide you through "${task.title}". How can I assist in its manifestation?` 
-        }
-      ]);
+    if (isOpen) {
+      if (task) {
+        setMessages([
+          { 
+            role: 'model', 
+            text: `Seeker, I am here to guide you through "${task.title}". How can I assist in its manifestation?` 
+          }
+        ]);
+      } else {
+        setMessages([
+          { 
+            role: 'model', 
+            text: `Seeker, the morning is clear. How may I advise you on your journey today?` 
+          }
+        ]);
+      }
     } else {
       setMessages([]);
     }
@@ -41,7 +50,7 @@ const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
   }, [messages, isTyping]);
 
   const handleSendMessage = async (text: string) => {
-    if (!text.trim() || !task) return;
+    if (!text.trim()) return;
 
     const userMsg: Message = { role: 'user', text };
     setMessages(prev => [...prev, userMsg]);
@@ -50,16 +59,17 @@ const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
 
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      // Added await here to resolve the promise before iterating over the stream
+      const contextText = task ? `Task Context: ${task.title} - ${task.description}. Category: ${task.category}.` : "General guidance request.";
+      
       const chat = await ai.models.generateContentStream({
         model: 'gemini-3-flash-preview',
         contents: [
-          { role: 'user', parts: [{ text: `Task Context: ${task.title} - ${task.description}. Category: ${task.category}.` }] },
+          { role: 'user', parts: [{ text: contextText }] },
           ...messages.map(m => ({ role: m.role, parts: [{ text: m.text }] })),
           { role: 'user', parts: [{ text }] }
         ],
         config: {
-          systemInstruction: "You are the Sage Advisor. Provide concise, philosophical, and practical guidance on the specific task. Keep responses focused on the user's progress through Maslow's hierarchy. Use a calm, wise tone."
+          systemInstruction: "You are the Sage Advisor. Provide concise, philosophical, and practical guidance. Keep responses focused on the user's progress through Maslow's hierarchy. Use a calm, wise tone."
         }
       });
 
@@ -82,26 +92,51 @@ const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
     }
   };
 
-  if (!isOpen || !task) return null;
+  if (!isOpen) return null;
+
+  // Use task-specific suggestions if task exists, otherwise use general ones
+  const activeSuggestions = task ? suggestions : generalSuggestions;
 
   return (
     <div className={`fixed inset-y-0 right-0 w-full md:w-[480px] bg-white shadow-[0_0_80px_rgba(0,0,0,0.1)] z-[100] transform transition-transform duration-500 ease-out flex flex-col border-l border-black/5 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
       <header className="p-8 border-b border-black/5 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-[#FAF7F2] flex items-center justify-center border border-black/5">
-            <i className={`fa-solid ${task.icon} text-[#3E3E3E]`}></i>
+            <i className={`fa-solid fa-wand-magic-sparkles text-[#3E3E3E] text-xs`}></i>
           </div>
           <div>
-            <h3 className="font-serif font-bold text-[#3E3E3E] text-lg">{task.title}</h3>
-            <p className="text-[10px] uppercase font-bold text-slate-300 tracking-[0.2em]">{task.category}</p>
+            <h3 className="font-serif font-bold text-[#3E3E3E] text-lg uppercase tracking-tight">AI Chat</h3>
+            <p className="text-[10px] uppercase font-bold text-slate-300 tracking-[0.2em]">Sage Personal Advisor</p>
           </div>
         </div>
-        <button onClick={onClose} className="w-10 h-10 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-300 transition-colors">
-          <i className="fa-light fa-xmark"></i>
-        </button>
+        <div className="flex items-center gap-2">
+          <button className="w-10 h-10 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-300 transition-colors" title="History">
+            <i className="fa-solid fa-bars"></i>
+          </button>
+          <button onClick={onClose} className="w-10 h-10 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-300 transition-colors">
+            <i className="fa-solid fa-xmark"></i>
+          </button>
+        </div>
       </header>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-8 bg-[#FAF7F2]/30 scrollbar-hide">
+        {/* Context Attachment Preview - Only shown if task is linked */}
+        {task && (
+          <div className="bg-white border border-black/5 rounded-[1.5rem] p-4 flex items-center gap-4 mb-4 animate-in fade-in slide-in-from-top-2 shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-[#FAF7F2] flex items-center justify-center text-[#3E3E3E] border border-black/5">
+              <i className={`fa-solid ${task.icon} text-xs`}></i>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Attached Context</p>
+              <p className="text-xs font-serif italic text-[#3E3E3E] truncate">{task.title}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+              <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Linked</span>
+            </div>
+          </div>
+        )}
+
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] p-6 rounded-[2rem] text-[15px] leading-relaxed ${
@@ -125,10 +160,9 @@ const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
       </div>
 
       <div className="p-8 bg-white border-t border-black/5 space-y-4">
-        {/* Chat Suggestions - Staggered Grid (Pinterest-style) using flex-col wrap */}
         <div className="h-[96px] overflow-x-auto scrollbar-hide">
           <div className="flex flex-col flex-wrap gap-2 h-full content-start">
-            {suggestions.map((suggestion, idx) => (
+            {activeSuggestions.map((suggestion, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSendMessage(suggestion)}

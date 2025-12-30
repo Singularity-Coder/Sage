@@ -51,6 +51,7 @@ export interface SageNotification {
 export interface SageNote {
   id: string;
   timestamp: number;
+  title?: string;
   content: string;
   tags: string[];
   sentiment: 'positive' | 'neutral' | 'reflective';
