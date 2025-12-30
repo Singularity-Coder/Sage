@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { DashboardCard } from '../types';
+import { suggestions } from '../constants';
 
 interface TaskChatProps {
   task: DashboardCard | null;
@@ -13,11 +14,6 @@ interface Message {
   role: 'user' | 'model';
   text: string;
 }
-
-const apiKey =
-  process.env.API_KEY ||
-  process.env.GEMINI_API_KEY ||
-  import.meta.env.VITE_GEMINI_API_KEY;
 
 const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -50,20 +46,12 @@ const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
     const userMsg: Message = { role: 'user', text };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
-
-    if (!apiKey) {
-      setMessages(prev => [
-        ...prev,
-        { role: 'model', text: "Gemini API key is missing. Add GEMINI_API_KEY to your .env.local to chat with Sage." }
-      ]);
-      return;
-    }
-
     setIsTyping(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey });
-      const chat = ai.models.generateContentStream({
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // Added await here to resolve the promise before iterating over the stream
+      const chat = await ai.models.generateContentStream({
         model: 'gemini-3-flash-preview',
         contents: [
           { role: 'user', parts: [{ text: `Task Context: ${task.title} - ${task.description}. Category: ${task.category}.` }] },
@@ -71,7 +59,7 @@ const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
           { role: 'user', parts: [{ text }] }
         ],
         config: {
-          systemInstruction: "You are the Sage Advisor. Provide concise, philosophical, and practical guidance on the specific task. Keep responses focused on the user's progress through Maslow's hierarchy."
+          systemInstruction: "You are the Sage Advisor. Provide concise, philosophical, and practical guidance on the specific task. Keep responses focused on the user's progress through Maslow's hierarchy. Use a calm, wise tone."
         }
       });
 
@@ -94,39 +82,32 @@ const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
     }
   };
 
-  const suggestions = [
-    "How do I achieve this?",
-    "Can you clarify the steps?",
-    "Why is this important for my level?",
-    "Give me a quick win for this."
-  ];
-
   if (!isOpen || !task) return null;
 
   return (
-    <div className={`fixed inset-y-0 right-0 w-full md:w-[450px] bg-white shadow-2xl z-[60] transform transition-transform duration-300 flex flex-col border-l border-slate-100 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-      <header className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white">
-            <i className={`fa-solid ${task.icon}`}></i>
+    <div className={`fixed inset-y-0 right-0 w-full md:w-[480px] bg-white shadow-[0_0_80px_rgba(0,0,0,0.1)] z-[100] transform transition-transform duration-500 ease-out flex flex-col border-l border-black/5 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <header className="p-8 border-b border-black/5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-[#FAF7F2] flex items-center justify-center border border-black/5">
+            <i className={`fa-solid ${task.icon} text-[#3E3E3E]`}></i>
           </div>
           <div>
-            <h3 className="font-bold text-slate-900 leading-tight">{task.title}</h3>
-            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">{task.category}</p>
+            <h3 className="font-serif font-bold text-[#3E3E3E] text-lg">{task.title}</h3>
+            <p className="text-[10px] uppercase font-bold text-slate-300 tracking-[0.2em]">{task.category}</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full text-slate-400 transition-colors">
-          <i className="fa-solid fa-xmark"></i>
+        <button onClick={onClose} className="w-10 h-10 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-300 transition-colors">
+          <i className="fa-light fa-xmark"></i>
         </button>
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-8 bg-[#FAF7F2]/30 scrollbar-hide">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed ${
+            <div className={`max-w-[85%] p-6 rounded-[2rem] text-[15px] leading-relaxed ${
               m.role === 'user' 
-                ? 'bg-indigo-600 text-white shadow-md rounded-br-none' 
-                : 'bg-white text-slate-700 shadow-sm border border-slate-100 rounded-bl-none'
+                ? 'bg-[#3E3E3E] text-white shadow-xl rounded-br-none' 
+                : 'bg-white text-[#3E3E3E] shadow-sm border border-black/5 rounded-bl-none font-serif italic text-lg'
             }`}>
               {m.text}
             </div>
@@ -134,39 +115,43 @@ const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
         ))}
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex gap-1">
-              <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></span>
-              <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce delay-75"></span>
-              <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce delay-150"></span>
+            <div className="bg-white p-5 rounded-[2rem] shadow-sm border border-black/5 flex gap-1.5 items-center">
+              <span className="w-1.5 h-1.5 bg-slate-200 rounded-full animate-bounce"></span>
+              <span className="w-1.5 h-1.5 bg-slate-200 rounded-full animate-bounce delay-75"></span>
+              <span className="w-1.5 h-1.5 bg-slate-200 rounded-full animate-bounce delay-150"></span>
             </div>
           </div>
         )}
       </div>
 
-      <div className="p-4 border-t border-slate-100 bg-white">
-        <div className="flex flex-wrap gap-2 mb-4">
-          {suggestions.map((s, i) => (
-            <button 
-              key={i} 
-              onClick={() => handleSendMessage(s)}
-              className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors border border-indigo-100"
-            >
-              {s}
-            </button>
-          ))}
+      <div className="p-8 bg-white border-t border-black/5 space-y-4">
+        {/* Chat Suggestions - Staggered Grid (Pinterest-style) using flex-col wrap */}
+        <div className="h-[96px] overflow-x-auto scrollbar-hide">
+          <div className="flex flex-col flex-wrap gap-2 h-full content-start">
+            {suggestions.map((suggestion, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSendMessage(suggestion)}
+                className="whitespace-nowrap bg-[#FAF7F2] border border-black/5 text-slate-500 px-5 py-2.5 rounded-full text-[10px] font-bold hover:bg-slate-100 transition-all active:scale-95 shadow-sm"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="relative">
+
+        <div className="relative pt-2">
           <input 
             type="text" 
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyPress={e => e.key === 'Enter' && handleSendMessage(input)}
             placeholder="Whisper your query..."
-            className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+            className="w-full pl-6 pr-14 py-4 bg-[#FAF7F2] border border-black/5 rounded-full focus:ring-0 outline-none text-sm placeholder:text-slate-300"
           />
           <button 
             onClick={() => handleSendMessage(input)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center hover:bg-indigo-700 transition-colors"
+            className="absolute right-2 top-[calc(50%+4px)] -translate-y-1/2 w-10 h-10 bg-[#3E3E3E] text-white rounded-full flex items-center justify-center hover:bg-black transition-all"
           >
             <i className="fa-solid fa-paper-plane text-xs"></i>
           </button>

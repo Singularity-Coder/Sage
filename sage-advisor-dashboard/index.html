@@ -4,31 +4,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sage Advisor Dashboard</title>
+    <title>Sage — Personal Advisor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+      
+      :root {
+        --oak-beige: #FAF7F2;
+        --oak-charcoal: #3E3E3E;
+        --oak-sage: #E8EDE7;
+        --oak-rose: #F5EAE8;
+        --oak-blue: #E7EEF2;
+      }
+
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #f8fafc;
+        background-color: var(--oak-beige);
+        color: var(--oak-charcoal);
       }
+      
       .font-serif {
         font-family: 'Playfair Display', serif;
       }
+
+      .oak-card {
+        background-color: white;
+        border-radius: 2.5rem;
+        border: 1px solid rgba(0,0,0,0.03);
+      }
+
       ::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: #f1f1f1;
+        background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
+        background: rgba(0,0,0,0.1);
+        border-radius: 10px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
+        background: rgba(0,0,0,0.2);
       }
+
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      /* Transitions for Oak feel */
+      .fade-enter { opacity: 0; transform: translateY(10px); }
+      .fade-enter-active { opacity: 1; transform: translateY(0); transition: all 500ms ease-out; }
     </style>
 <script type="importmap">
 {
@@ -42,7 +72,7 @@
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
-<body class="overflow-hidden h-screen w-screen bg-slate-50 text-slate-900">
+<body class="overflow-hidden h-screen w-screen selection:bg-rose-100">
     <div id="root" class="h-full w-full"></div>
 <script type="module" src="/index.tsx"></script>
 </body>

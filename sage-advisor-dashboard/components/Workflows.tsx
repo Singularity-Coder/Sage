@@ -11,60 +11,73 @@ const Workflows: React.FC = () => {
   ];
 
   return (
-    <div className="h-full flex flex-col">
-      <header className="mb-8 flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-serif font-bold text-slate-800 underline decoration-indigo-200 underline-offset-8">Cognitive Workflows</h2>
-          <p className="text-slate-500 mt-3">The underlying autonomous logic powering your agent.</p>
+    <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
+      <header className="flex flex-col items-start text-left w-full space-y-1">
+        <h2 className="text-2xl md:text-3xl font-serif font-bold text-[#3E3E3E] tracking-tight">
+          Cognitive Workflows
+        </h2>
+        <div className="flex items-center justify-between w-full">
+          <p className="text-slate-400 text-sm md:text-base font-medium tracking-tight">
+            The underlying autonomous logic powering your agent.
+          </p>
+          <button className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-[#3E3E3E] transition-all active:scale-95 border border-black/10 px-4 py-2 rounded-full bg-white/50 hover:bg-white hover:border-black/20 shadow-sm">
+            <i className="fa-solid fa-plus text-[10px]"></i>
+            Add Node
+          </button>
         </div>
-        <button className="bg-indigo-600 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors">
-          Add Node
-        </button>
       </header>
 
-      <div className="flex-1 bg-white rounded-3xl border border-slate-200 relative overflow-hidden shadow-inner p-4">
-        {/* Connection Lines (Conceptual SVG) */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none">
-          <defs>
-            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#cbd5e1" />
-            </marker>
-          </defs>
-          <path d="M 120 170 L 250 80" stroke="#cbd5e1" strokeWidth="2" fill="none" markerEnd="url(#arrow)" />
-          <path d="M 120 170 L 250 260" stroke="#cbd5e1" strokeWidth="2" fill="none" markerEnd="url(#arrow)" />
-          <path d="M 320 80 L 450 160" stroke="#cbd5e1" strokeWidth="2" fill="none" markerEnd="url(#arrow)" />
-          <path d="M 320 260 L 450 180" stroke="#cbd5e1" strokeWidth="2" fill="none" markerEnd="url(#arrow)" />
-          <path d="M 520 170 L 650 170" stroke="#cbd5e1" strokeWidth="2" fill="none" markerEnd="url(#arrow)" />
-        </svg>
+      <div className="bg-[#FAF7F2]/50 rounded-[2rem] border border-black/[0.03] p-8 relative min-h-[500px] overflow-hidden">
+        {/* Canvas Area */}
+        <div className="relative w-full h-full min-h-[400px]">
+          {/* Connection Lines (Conceptual SVG) */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#3E3E3E" opacity="0.1" />
+              </marker>
+            </defs>
+            <path d="M 120 170 L 250 80" stroke="#3E3E3E" strokeOpacity="0.1" strokeWidth="1.5" fill="none" markerEnd="url(#arrow)" />
+            <path d="M 120 170 L 250 260" stroke="#3E3E3E" strokeOpacity="0.1" strokeWidth="1.5" fill="none" markerEnd="url(#arrow)" />
+            <path d="M 320 80 L 450 160" stroke="#3E3E3E" strokeOpacity="0.1" strokeWidth="1.5" fill="none" markerEnd="url(#arrow)" />
+            <path d="M 320 260 L 450 180" stroke="#3E3E3E" strokeOpacity="0.1" strokeWidth="1.5" fill="none" markerEnd="url(#arrow)" />
+            <path d="M 520 170 L 650 170" stroke="#3E3E3E" strokeOpacity="0.1" strokeWidth="1.5" fill="none" markerEnd="url(#arrow)" />
+          </svg>
 
-        {/* Nodes */}
-        {nodes.map(node => (
-          <div 
-            key={node.id}
-            className={`absolute w-40 p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center gap-2 bg-white cursor-pointer hover:border-indigo-400 hover:shadow-md transition-all`}
-            style={{ left: node.x, top: node.y }}
-          >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white ${
-              node.type === 'trigger' ? 'bg-amber-500' :
-              node.type === 'ai' ? 'bg-purple-600' :
-              node.type === 'output' ? 'bg-emerald-500' : 'bg-indigo-600'
-            }`}>
-              <i className={`fa-solid ${node.icon}`}></i>
+          {/* Nodes */}
+          {nodes.map(node => (
+            <div 
+              key={node.id}
+              className="absolute w-44 p-5 rounded-[2rem] bg-white border border-black/5 flex flex-col items-center gap-3 cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] transition-all group"
+              style={{ left: node.x, top: node.y }}
+            >
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105 ${
+                node.type === 'trigger' ? 'bg-[#D97706]' :
+                node.type === 'ai' ? 'bg-[#7C3AED]' :
+                node.type === 'output' ? 'bg-[#059669]' : 'bg-[#2563EB]'
+              }`}>
+                <i className={`fa-solid ${node.icon} text-sm`}></i>
+              </div>
+              <div className="text-center">
+                <p className="text-xs font-bold text-[#3E3E3E] mb-0.5">{node.label}</p>
+                <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold opacity-60">{node.type}</p>
+              </div>
             </div>
-            <span className="text-xs font-bold text-slate-800">{node.label}</span>
-            <span className="text-[10px] text-slate-400 uppercase tracking-tighter">{node.type}</span>
-          </div>
-        ))}
+          ))}
+        </div>
 
-        <div className="absolute bottom-6 right-6 bg-slate-900/5 backdrop-blur-md border border-slate-900/10 p-4 rounded-2xl max-w-xs">
-          <p className="text-xs font-bold text-slate-500 uppercase mb-2">System Status</p>
-          <div className="flex items-center gap-2 text-xs text-slate-700">
-            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-            Agent Core: Running
-          </div>
-          <div className="flex items-center gap-2 text-xs text-slate-700 mt-1">
-            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-            MCP Connectivity: 120ms
+        {/* System Status Indicator - Themed */}
+        <div className="absolute bottom-8 right-8 bg-white/60 backdrop-blur-md border border-black/5 p-5 rounded-[2rem] shadow-sm">
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3">System Integrity</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 text-[10px] font-bold text-[#3E3E3E]">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+              Core: Resonating
+            </div>
+            <div className="flex items-center gap-3 text-[10px] font-bold text-[#3E3E3E]">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+              MCP Status: Synchronized
+            </div>
           </div>
         </div>
       </div>

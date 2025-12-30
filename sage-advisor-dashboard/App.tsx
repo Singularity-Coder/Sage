@@ -203,82 +203,48 @@ const App: React.FC = () => {
         return <Notes isDummy={profile.isDummyMode} />;
       case 'mcp':
         return (
-          <div className="flex flex-col items-center justify-center h-full text-center p-10 bg-white rounded-[3rem] border border-dashed border-slate-300">
-            <div className="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-3xl mb-6">
-              <i className="fa-solid fa-server"></i>
-            </div>
-            <h2 className="text-2xl font-serif font-bold text-slate-800">MCP Integrations</h2>
-            <p className="text-slate-500 max-w-sm mt-4">
-              Connect to your local Model Context Protocol servers to provide Sage with private context from your local files, databases, and apps.
-            </p>
-            <button className="mt-8 bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-colors">
-              Add Local Server
-            </button>
+          <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
+             <header className="flex flex-col items-start text-left w-full space-y-1">
+                <h2 className="text-2xl md:text-3xl font-serif font-bold text-[#3E3E3E] tracking-tight">
+                  Nexus of Growth
+                </h2>
+                <div className="flex items-center justify-between w-full">
+                  <p className="text-slate-400 text-sm md:text-base font-medium tracking-tight">
+                    Local Model Context Protocol connectivity.
+                  </p>
+                  <button className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-[#3E3E3E] transition-all active:scale-95 border border-black/10 px-4 py-2 rounded-full bg-white/50 hover:bg-white hover:border-black/20 shadow-sm">
+                    <i className="fa-solid fa-server text-[10px]"></i>
+                    Add Server
+                  </button>
+                </div>
+              </header>
+
+              <div className="bg-[#FAF7F2]/50 rounded-[2rem] border border-black/[0.03] p-16 flex flex-col items-center justify-center text-center">
+                <div className="w-20 h-20 bg-white text-[#3E3E3E] rounded-[2rem] flex items-center justify-center text-3xl mb-8 border border-black/5 shadow-sm">
+                  <i className="fa-solid fa-cloud-bolt"></i>
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-[#3E3E3E] mb-4 italic">"True knowledge resides in the edge of existence."</h3>
+                <p className="text-slate-400 max-w-sm font-medium mb-10 leading-relaxed">
+                  Connect to your local Model Context Protocol servers to provide Sage with private context from your local files, databases, and apps.
+                </p>
+                <button className="bg-[#3E3E3E] text-white px-10 py-4 rounded-full text-xs font-bold hover:bg-black transition-all shadow-lg active:scale-95">
+                  Begin Synchronization
+                </button>
+              </div>
           </div>
         );
       case 'settings':
         return (
-          <div className="max-w-2xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
-            <h2 className="text-3xl font-serif font-bold mb-8 text-slate-800">Essence Configuration</h2>
-            
-            <div className="space-y-8">
-              {/* Dummy Mode Switch */}
-              <div className="flex items-center justify-between p-6 bg-slate-50 rounded-[2rem] border-2 border-dashed border-indigo-100/50">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-sm ${profile.isDummyMode ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'}`}>
-                    <i className={`fa-solid ${profile.isDummyMode ? 'fa-vial-circle-check' : 'fa-brain-circuit'}`}></i>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-800">Simulated Presence (Dummy Data)</h3>
-                    <p className="text-xs text-slate-500 font-medium">When active, Sage uses pre-defined static data instead of the Gemini API.</p>
-                  </div>
-                </div>
+          <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
+            <header className="flex flex-col items-start text-left w-full space-y-1">
+              <h2 className="text-2xl md:text-3xl font-serif font-bold text-[#3E3E3E] tracking-tight">
+                Essence Configuration
+              </h2>
+              <div className="flex items-center justify-between w-full">
+                <p className="text-slate-400 text-sm md:text-base font-medium tracking-tight">
+                  Tune the parameters of your personal advisor.
+                </p>
                 <button 
-                  onClick={toggleDummyMode}
-                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none ${profile.isDummyMode ? 'bg-amber-500' : 'bg-slate-300'}`}
-                >
-                  <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${profile.isDummyMode ? 'translate-x-7' : 'translate-x-1'}`} />
-                </button>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Core Intelligence Provider</label>
-                <div className="flex gap-4">
-                  <button 
-                    disabled={profile.isDummyMode}
-                    className={`flex-1 p-5 rounded-[2rem] border-2 transition-all flex flex-col gap-2 ${!profile.isDummyMode ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700' : 'border-slate-100 text-slate-300 cursor-not-allowed'}`}
-                  >
-                    <i className="fa-solid fa-sparkles text-xl"></i>
-                    <span className="font-bold text-sm">Gemini Flash</span>
-                    <span className="text-[10px] opacity-70">Real-time awareness</span>
-                  </button>
-                  <button 
-                    disabled={!profile.isDummyMode}
-                    className={`flex-1 p-5 rounded-[2rem] border-2 transition-all flex flex-col gap-2 ${profile.isDummyMode ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 text-slate-300 cursor-not-allowed'}`}
-                  >
-                    <i className="fa-solid fa-microchip text-xl"></i>
-                    <span className="font-bold text-sm">Static Vault</span>
-                    <span className="text-[10px] opacity-70">Mock data stream</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="pt-8 border-t border-slate-100">
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Profile Synthesis</label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-50 p-5 rounded-[1.5rem]">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Profession</span>
-                    <span className="font-bold text-slate-800">{profile.profession}</span>
-                  </div>
-                  <div className="bg-slate-50 p-5 rounded-[1.5rem]">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Ambition</span>
-                    <span className="font-bold text-slate-800">{profile.financialAmbition}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-8 flex justify-between items-center">
-                 <button 
                   onClick={() => {
                     localStorage.removeItem('sage_profile');
                     localStorage.removeItem('sage_cards');
@@ -286,13 +252,80 @@ const App: React.FC = () => {
                     localStorage.removeItem('sage_memories');
                     window.location.reload();
                   }}
-                  className="px-6 py-3 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 transition-colors border border-transparent hover:border-red-100"
+                  className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-rose-400 hover:text-rose-600 transition-all active:scale-95 border border-rose-100 px-4 py-2 rounded-full bg-rose-50/30 hover:bg-rose-50 shadow-sm"
                 >
-                  Reset Soul Data
+                  <i className="fa-solid fa-ghost text-[10px]"></i>
+                  Reset Soul
                 </button>
-                <button className="bg-slate-900 text-white px-10 py-3 rounded-xl font-bold hover:bg-black transition-all shadow-lg hover:shadow-slate-200">
-                  Save Changes
+              </div>
+            </header>
+
+            <div className="max-w-3xl mx-auto space-y-8">
+              {/* Dummy Mode Switch */}
+              <div className="flex items-center justify-between p-8 bg-[#FAF7F2]/50 rounded-[2.5rem] border border-black/[0.03]">
+                <div className="flex items-center gap-6">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl shadow-sm transition-all ${profile.isDummyMode ? 'bg-amber-100 text-amber-600 border border-amber-200' : 'bg-white text-slate-400 border border-black/5'}`}>
+                    <i className={`fa-solid ${profile.isDummyMode ? 'fa-vial' : 'fa-brain'}`}></i>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-[#3E3E3E] text-lg">Simulated Presence</h3>
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1 opacity-60">Mock Data Environment</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={toggleDummyMode}
+                  className={`relative inline-flex h-9 w-16 items-center rounded-full transition-colors focus:outline-none ${profile.isDummyMode ? 'bg-amber-500' : 'bg-slate-200'}`}
+                >
+                  <span className={`inline-block h-7 w-7 transform rounded-full bg-white transition-transform shadow-sm ${profile.isDummyMode ? 'translate-x-8' : 'translate-x-1'}`} />
                 </button>
+              </div>
+
+              <div className="bg-white p-10 rounded-[3rem] border border-black/5 shadow-[0_10px_40px_rgba(0,0,0,0.02)] space-y-10">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em] mb-6">Intelligence Matrix</label>
+                  <div className="flex gap-6">
+                    <button 
+                      disabled={profile.isDummyMode}
+                      className={`flex-1 p-6 rounded-[2rem] border transition-all flex flex-col gap-3 ${!profile.isDummyMode ? 'border-blue-600 bg-blue-50/50 text-blue-700 shadow-sm' : 'border-black/5 bg-transparent text-slate-300 opacity-40 cursor-not-allowed'}`}
+                    >
+                      <i className="fa-solid fa-bolt-lightning text-xl"></i>
+                      <div className="text-left">
+                        <span className="font-bold text-sm block">Gemini Engine</span>
+                        <span className="text-[9px] uppercase font-bold tracking-widest opacity-60">Active Awareness</span>
+                      </div>
+                    </button>
+                    <button 
+                      disabled={!profile.isDummyMode}
+                      className={`flex-1 p-6 rounded-[2rem] border transition-all flex flex-col gap-3 ${profile.isDummyMode ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-black/5 bg-transparent text-slate-300 opacity-40 cursor-not-allowed'}`}
+                    >
+                      <i className="fa-solid fa-box-archive text-xl"></i>
+                      <div className="text-left">
+                        <span className="font-bold text-sm block">Static Archive</span>
+                        <span className="text-[9px] uppercase font-bold tracking-widest opacity-60">Local Simulation</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-8 border-t border-black/[0.03]">
+                  <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em] mb-6">Biological Profile</label>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="bg-[#FAF7F2]/50 p-6 rounded-[2rem] border border-black/[0.02]">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Profession</span>
+                      <span className="font-serif italic text-xl text-[#3E3E3E] font-bold">{profile.profession}</span>
+                    </div>
+                    <div className="bg-[#FAF7F2]/50 p-6 rounded-[2rem] border border-black/[0.02]">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Ambition</span>
+                      <span className="font-serif italic text-xl text-[#3E3E3E] font-bold">{profile.financialAmbition}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-8 flex justify-end">
+                  <button className="bg-[#3E3E3E] text-white px-12 py-4 rounded-full text-xs font-bold hover:bg-black transition-all shadow-xl active:scale-95">
+                    Save Session Parameters
+                  </button>
+                </div>
               </div>
             </div>
           </div>

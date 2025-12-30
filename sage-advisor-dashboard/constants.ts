@@ -24,6 +24,34 @@ export const INITIAL_PROFILE = {
   isDummyMode: true,
 };
 
+export const navItems = [
+    { id: 'dashboard', icon: 'fa-leaf', label: 'Home' },
+    { id: 'workflows', icon: 'fa-wind', label: 'Workflows' },
+    { id: 'calendar', icon: 'fa-moon', label: 'Calendar' },
+    { id: 'notes', icon: 'fa-feather', label: 'Memories' },
+    { id: 'mcp', icon: 'fa-seedling', label: 'Growth' },
+    { id: 'settings', icon: 'fa-gear', label: 'Settings' },
+];
+
+/*
+How do I achieve this?
+Why is this important for my level?
+ */
+export const suggestions = [
+    "How do I start?",
+    "Why is this important now?",
+    "Tell me more about the benefits",
+    "What are the potential risks?",
+    "Give me a step-by-step guide",
+    "Simplify this for me",
+    "Give me some examples",
+    "Next logical step?",
+    "What are the prerequisites?",
+    "Can you explain the philosophy?",
+    "Give me a quick win for this.",
+    "Can you clarify the steps?"
+];
+
 export const SAGE_SYSTEM_PROMPT = `
 You are the "Sage Advisor," a philosophical and highly intelligent autonomous agent. 
 Your goal is to guide users through the levels of Maslow's Hierarchy of Needs, from survival to spiritual transcendence.
