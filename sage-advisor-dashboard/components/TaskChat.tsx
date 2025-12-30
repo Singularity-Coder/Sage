@@ -14,6 +14,11 @@ interface Message {
   text: string;
 }
 
+const apiKey =
+  process.env.API_KEY ||
+  process.env.GEMINI_API_KEY ||
+  import.meta.env.VITE_GEMINI_API_KEY;
+
 const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -45,10 +50,19 @@ const TaskChat: React.FC<TaskChatProps> = ({ task, isOpen, onClose }) => {
     const userMsg: Message = { role: 'user', text };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
+
+    if (!apiKey) {
+      setMessages(prev => [
+        ...prev,
+        { role: 'model', text: "Gemini API key is missing. Add GEMINI_API_KEY to your .env.local to chat with Sage." }
+      ]);
+      return;
+    }
+
     setIsTyping(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey });
       const chat = ai.models.generateContentStream({
         model: 'gemini-3-flash-preview',
         contents: [

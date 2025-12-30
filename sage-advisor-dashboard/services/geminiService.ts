@@ -3,8 +3,18 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { SAGE_SYSTEM_PROMPT } from "../constants";
 import { UserProfile, MaslowLevel, DashboardCard } from "../types";
 
-// Always use the required initialization format and direct process.env.API_KEY
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey =
+  process.env.API_KEY ||
+  process.env.GEMINI_API_KEY ||
+  import.meta.env.VITE_GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error(
+    "Gemini API key missing. Set GEMINI_API_KEY (or VITE_GEMINI_API_KEY) in your .env.local file."
+  );
+}
+
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export async function getSageRecommendations(profile: UserProfile): Promise<DashboardCard[]> {
   const currentTime = new Date().toLocaleTimeString();
@@ -28,6 +38,8 @@ export async function getSageRecommendations(profile: UserProfile): Promise<Dash
   `;
 
   try {
+    if (!ai) return [];
+
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
@@ -66,6 +78,8 @@ export async function getSageRecommendations(profile: UserProfile): Promise<Dash
 export async function analyzeJournalEntry(content: string) {
   const prompt = `Analyze this journal entry: "${content}". Provide a summary and identify which Maslow need it addresses.`;
   try {
+    if (!ai) return "Gemini API key is not configured. Add GEMINI_API_KEY to your .env.local.";
+
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
